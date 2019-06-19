@@ -22,14 +22,15 @@ USTRUCT(BlueprintType)
 struct FTeamProperties
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
 		FName TeamName;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
-		ETeamType MyTeam;
-	UPROPERTY(EditAnywhere, Category = "AI")
-		TArray<ETeamType> FriendList;
+		int32 AITeamID;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
-		TArray<ETeamType> EnemyList;
+		TArray<int32> FriendListID;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+		TArray<int32> EnemyListID;
 };
 
 UCLASS()
@@ -44,23 +45,19 @@ public:
 
 private:
 
-	FGenericTeamId AITeamID;
-	
-	UPROPERTY(EditAnywhere,Category = "AI")
-		TArray<ETeamType> FriendList;
-
 	UPROPERTY(EditAnywhere, Category = "AI")
 		FTeamProperties TeamProperties;
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "AI")
-		virtual void SetTeamProperties(const FTeamProperties& TeamProp);
-	UFUNCTION()
-		virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID)override;
+		virtual void SetTeamProperties(const FTeamProperties TeamProp);
 
+	/*UFUNCTION()
+		virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID);
+*/
 	/** Retrieve team identifier in form of FGenericTeamId */
 	UFUNCTION(BlueprintCallable, Category = "AI")
-		virtual FGenericTeamId GetGenericTeamId()const override;
+		virtual FTeamProperties GetTeamProperties()const;
 
 	ETeamAttitude::Type GetTeamAttitudeTowards(const AActor & Other) const override;
 };

@@ -2,7 +2,6 @@
 
 
 #include "AIControllerBase.h"
-#include <Perception/AISenseConfig_Sight.h>
 #include <Perception/AIPerceptionComponent.h>
 
 AAIControllerBase::AAIControllerBase()
@@ -15,49 +14,40 @@ void AAIControllerBase::OnPossess(APawn* InPawn)
 	Super::OnPossess(InPawn);
 }
 
-void AAIControllerBase::SetTeamProperties(const FTeamProperties& TeamProp)
+void AAIControllerBase::SetTeamProperties(const FTeamProperties TeamProp)
 {
-	TeamProperties = TeamProp; 
-	FGenericTeamId NewTeamID = (uint8)TeamProp.MyTeam;
-
-	SetGenericTeamId(NewTeamID);
+	TeamProperties = TeamProp;
+	
 }
 
-void AAIControllerBase::SetGenericTeamId(const FGenericTeamId& NewTeamID)
+FTeamProperties AAIControllerBase::GetTeamProperties() const
 {
-	AITeamID = NewTeamID;
-}
-
-FGenericTeamId AAIControllerBase::GetGenericTeamId() const
-{
-	return AITeamID;
+	return TeamProperties;
 }
 
 ETeamAttitude::Type AAIControllerBase::GetTeamAttitudeTowards(const AActor & Other) const
 {
 	if (const APawn* OtherPawn = Cast<APawn>(&Other)) {
 
-		if (const IGenericTeamAgentInterface* TeamAgent = Cast<IGenericTeamAgentInterface>(OtherPawn->GetController()))
+		if (const AAIControllerBase* BaseController = Cast<AAIControllerBase>(OtherPawn->GetController()))
 		{
-			FGenericTeamId OtherTeamID = TeamAgent->GetGenericTeamId();
+			FTeamProperties OtherTeamProperties = BaseController->GetTeamProperties();
 
-			if (OtherTeamID == AITeamID)
+
+			if (OtherTeamProperties.AITeamID == TeamProperties.AITeamID)
 			{
-
-				//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("team %s"), *OtherPawn->GetName()));
 				return ETeamAttitude::Friendly;
 			}
-			for (ETeamType Team : TeamProperties.EnemyList)
+			for (int32 Team : TeamProperties.EnemyListID)
 			{
-
-				if (OtherTeamID == (uint8)Team)
+				if (Team == OtherTeamProperties.AITeamID)
 				{
 					return ETeamAttitude::Hostile;
 				}
 			}
-			for (ETeamType Team : TeamProperties.FriendList)
+			for (int32 Team : TeamProperties.FriendListID)
 			{
-				if (OtherTeamID == (uint8)Team)
+				if (Team == OtherTeamProperties.AITeamID)
 				{
 					return ETeamAttitude::Friendly;
 				}
